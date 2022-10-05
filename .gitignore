@@ -1,0 +1,12 @@
+node_modules/
+package-lock.json
+api/logapi/*
+.nyc_output/
+coverage/
+sqltools_20211007082237_3184.log
+*.sql
+.vscode/
+mochawesome-report/
+.env
+logapi/
+public/files

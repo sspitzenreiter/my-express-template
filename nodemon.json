@@ -1,0 +1,8 @@
+{
+    "env":{
+        "PORT":"3600",
+        "CORS_ORIGIN":"*",
+        "DB":"postgres://postgres:postgres@localhost:5432/testing",
+        "NODE_ENV":"development"        
+    }
+}

@@ -1,0 +1,1 @@
+exports.uploads = require('./../services/uploads');

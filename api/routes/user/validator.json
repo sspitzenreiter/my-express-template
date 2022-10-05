@@ -1,0 +1,20 @@
+{
+    "table":"user",
+    "table_id":"username",
+    "route_data":[
+        {
+            "routes":"/",
+            "name":"user_get",
+            "method":"get",
+            "values":[
+                
+            ],
+            "result":[
+                {
+                    "keyword":"keterangan",
+                    "type":"json"
+                }
+            ]
+        }
+    ]
+}

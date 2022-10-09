@@ -38,7 +38,7 @@ route_list.filter(x=>x.search(".js")==-1).map(x=>{
         })
 
         //Authenticate with middleware
-        routes.use('/'+x,authorization.validate_user,(req, res, next)=>{
+        routes.use('/'+x,(req, res, next)=>{
             next()
         });
         
@@ -54,6 +54,13 @@ route_list.filter(x=>x.search(".js")==-1).map(x=>{
                     indexer_call_avail = true;
                     indexer_call = require('./'+x);
                 }
+                routes.use('/'+x+route_string,(req, res, next)=>{
+                    if(y.table!==undefined){
+                        req.routemodel = new mainModel(y.table);
+                    }
+                    console.log(req.routemodel)
+                    next();
+                })
                 switch(y.method){
                     case "get":
                         routes.get('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,mainClass.getAll]));

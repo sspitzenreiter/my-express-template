@@ -19,13 +19,24 @@ fs.readdir(__dirname, (err, files) => {
     var changes_done = false;
     files.filter(x=>x.search(".js")==-1).forEach(file => {
         var stats_validator = null;
-        var stats_docs = null;
+        var stats_docs = 0;
         try{
             var dir = __dirname+'/'+file;
             try{
                 stats_validator = fs.statSync(dir+"/validator.json");
-                stats_docs = require(dir+"/docs.js").last_sync;
                 
+                
+            }catch(err){
+                console.log(err);
+            }
+            try{
+                stats_docs = require(dir+"/docs.js");
+                if(stats_docs!==undefined){
+                    stats_docs = stats_docs.last_sync
+                }else{
+                    
+                    stats_docs = null;
+                }
             }catch(err){
                 console.log(err);
             }
@@ -110,8 +121,10 @@ route_values.map(y=>{
  })
  text+="\n*/"
         })
-            fs.writeFileSync(dir+'/docs.js',text);
+            
+            
         })
+        fs.writeFileSync(dir+'/docs.js',text);
         //End of sync docs
     }else{
         console.log("Already synced")

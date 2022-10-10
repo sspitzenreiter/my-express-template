@@ -77,7 +77,7 @@ text +=
 /**
  * @swagger
  * `+(x.routes=="/"?"/"+file:"/"+file+x.routes)+` | (Role `+y+`):
- *   `+x.method+`:
+ *   `+(x.method=="get_one"?"get":x.method)+`:
  *     summary: `+x.routes+`
  *     description: `+x.routes+`
  *     tags:

@@ -1,6 +1,8 @@
 const e = require('express');
 const {validationResult, query, body, param} = require('express-validator');
 const req = require('express/lib/request');
+const { off } = require('../routes');
+const {mainModel} = require('./models');
 exports.filterData=(keys, data)=>{
     return Object.keys(data)
     .filter(key => keys.includes(key))
@@ -17,6 +19,39 @@ function isJson(str) {
         return false;
     }
     return true;
+}
+
+function fetchRequireData(data, req={}){
+    return new Promise(async (resolve, reject)=>{
+        var returnData = [];
+        await data.map(async x=>{
+            var data = {};
+            if(x.source=="database"){
+                var model = new mainModel(x.table);
+                var search = {}
+                await fetchRequireData(x.search_data, req).then(fetchedData=>{
+                    fetchedData.map(x=>{
+                        search[Object.keys(x)[0]] = x[Object.keys(x)[0]];
+                    });
+                })
+                
+                await model.get(search).then(x=>{
+                    
+                    data = {[x.keyword]:JSON.parse(JSON.stringify(x))[x.keyword]}
+                }).catch(err=>{
+                    reject(err);
+                })
+            }else if(x.source=="middleware_variable"){
+                data = {[x.keyword]:req[x.variable][x.keyword]}
+            }
+            if(x.alias!==undefined){
+                data[x.alias] = data[x.keyword];
+                delete data[x.keyword];
+            }
+            returnData.push([data,x]);
+        })  
+        resolve(returnData)
+    })
 }
 
 exports.limitation_validate = () =>{
@@ -132,6 +167,7 @@ exports.verify = async (req, res, next) =>{
         }
         
     })
+    
     var value_validator = validators.values;
     if(!Array.isArray(value_validator) && isJson(JSON.stringify(value_validator))){
         if(req.auth_data!==undefined){
@@ -187,6 +223,41 @@ exports.verify = async (req, res, next) =>{
         }
         return validator_template(req,method, x.requirements,x.type).run(req);
     });
+    
+        var database_check = [];
+        if(validators.required_data!==undefined){
+            await fetchRequireData(validators.required_data, req).then(x=>{
+                x.map(y=>{
+                    if(y[1].assigned_to!==undefined){
+                        req.filtered[y[1].assigned_to] = {
+                            ...req.filtered[y[1].assigned_to],
+                            ...y[0]
+                        }
+                    }else{
+                        if(req.method=="GET"){
+                            req.filtered['query'] = {
+                                ...req.filtered['query'],
+                                ...y[0]
+                            }    
+                        }else{
+                            x.map(y=>{
+                                req.filtered['body'] = {
+                                    ...req.filtered['body'],
+                                    ...y[0]
+                                }    
+                            })
+                        }
+                    }
+                    
+                })
+            }).catch(err=>{
+                console.log(err);
+                res.status(500).send({
+                    message:"Validation Error"
+                })
+            })
+        }
+    
     if(validators.result!==undefined){
         res.result_modifier = validators.result;
     }

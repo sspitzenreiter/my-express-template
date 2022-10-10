@@ -7,19 +7,22 @@ module.exports = class MainRouter {
             "limit":limit,
             "offset":offset
         }
-        if(req.data_opt_extras.table_data_attributes!==undefined){
-            opts['attributes'] = req.data_opt_extras.table_data_attributes;
-            
+        if(req.data_opt_extras!==undefined){
+            if(req.data_opt_extras.table_data_attributes!==undefined){
+                opts['attributes'] = req.data_opt_extras.table_data_attributes;
+                
+            }
+            if(req.data_opt_extras.table_data_order!==undefined){
+                opts['order'] = req.data_opt_extras.table_data_order;
+                
+            }
+    
+            if(req.data_opt_extras.table_data_override_where!==undefined){
+                opts['where'] = req.data_opt_extras.table_data_override_where
+                
+            }
         }
-        if(req.data_opt_extras.table_data_order!==undefined){
-            opts['order'] = req.data_opt_extras.table_data_order;
-            
-        }
-
-        if(req.data_opt_extras.table_data_override_where!==undefined){
-            opts['where'] = req.data_opt_extras.table_data_override_where
-            
-        }
+        
         
         req.routemodel.getAll(req.filtered['query'], opts).then(x=>{
             if(req.isNext==true){

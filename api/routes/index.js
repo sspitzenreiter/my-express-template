@@ -54,33 +54,32 @@ route_list.filter(x=>x.search(".js")==-1).map(x=>{
                     indexer_call_avail = true;
                     indexer_call = require('./'+x);
                 }
-                routes.use('/'+x+route_string,(req, res, next)=>{
+                checkRouteModel = (req, res, next)=>{
                     if(y.table!==undefined){
                         req.routemodel = new mainModel(y.table);
                     }
-                    console.log(req.routemodel)
                     next();
-                })
+                }
                 switch(y.method){
                     case "get":
-                        routes.get('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,mainClass.getAll]));
+                        routes.get('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,checkRouteModel,mainClass.getAll]));
                     break;
                     case "get_one":
-                        routes.get('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,mainClass.getOne]));
+                        routes.get('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,checkRouteModel,mainClass.getOne]));
                     break;
                     case "post":
                         if(y.bulk){
-                            routes.post('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,mainClass.postMany]));
+                            routes.post('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,checkRouteModel,mainClass.postMany]));
                         }else{
-                            routes.post('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,mainClass.post]));
+                            routes.post('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,checkRouteModel,mainClass.post]));
                         }
                         
                     break;
                     case "patch":
-                        routes.patch('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,mainClass.patch]));
+                        routes.patch('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,checkRouteModel,mainClass.patch]));
                     break;
                     case "delete":
-                        routes.delete('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,mainClass.delete]));
+                        routes.delete('/'+x+route_string,(y.custom_route!==undefined?indexer_call[y.custom_route]:[verify,checkRouteModel,mainClass.delete]));
                     break;
                 }
                 

@@ -46,16 +46,43 @@ if(args.findIndex(x=>x=="createroute")>-1){
         })
         
         if(runnable){
-            exec("cd api/model && npx cross-env USER="+conn.user+" PASS="+conn.password+" DB="+conn.database+" DIALECT=postgres HOST="+conn.host+" node sequelize-auto.js",(err)=>{
+            exec("cd api/model && npx cross-env USER="+conn.user+" PASS="+conn.password+" DATABASE="+conn.database+" DIALECT=postgres HOST="+conn.host+" node sequelize-auto.js",(err, stdout)=>{
                 if(err){
                     console.log(err);
                 }else{
+                    console.log(stdout)
                     console.log("Model Generation Success")
                 }
             })
         }else{
             console.log("Invalid connection : "+nodemon_file.env.DB)
         }
+    }else{
+        console.log("Nodemon file not exists")
+    }
+    
+}else if(args.findIndex(x=>x=="dbfillseeders")>-1){
+    if(nodemon_file!=null){
+        process.env.DB = nodemon_file.env.DB;
+        var mainModel = require('./api/model/mainModel');
+        var table_list = require('./api/model/migration_extras.json').table_list;
+        table_list.map(x=>{
+            var model = new mainModel(x.table);
+            var ignore = ["created_date","last_update"]
+            var sendData = {
+                "data":{}
+            }
+            Object.keys(model.models.rawAttributes).map(y=>{
+                if(!ignore.includes(y)){
+                    sendData['data'][y] = "";
+                }
+                
+            })
+            
+            fs.writeFileSync('./api/model/seeders/'+x.table+'.json',JSON.stringify(sendData,null,"\t"))
+        })
+        
+        
     }else{
         console.log("Nodemon file not exists")
     }

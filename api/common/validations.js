@@ -43,6 +43,8 @@ function fetchRequireData(data, req={}){
                 })
             }else if(x.source=="middleware_variable"){
                 data = {[x.keyword]:req[x.variable][x.keyword]}
+            }else if(x.source=="input_manual"){
+                data = {[x.keyword]:x.value}
             }
             if(x.alias!==undefined){
                 data[x.alias] = data[x.keyword];
@@ -60,48 +62,70 @@ exports.limitation_validate = () =>{
         query('offset', 'content cannot be empty').optional().notEmpty().isNumeric()
     ]
 }
-var validator_template = (req, method, separator, type="") =>{
-    var ret_type = method;
-    
-    switch(separator){
-        case "optional_notempty":
+var validator_template = (req, opt) =>{
+    var ret_type = opt.method;
+    if(opt.requirements!==undefined){
+        switch(opt.requirements){
+            case "optional_notempty":
+                
+                if(req.forceValidationRequired!==undefined && req.forceValidationRequired){
+                    ret_type = ret_type.exists();    
+                }else{
+                    ret_type = ret_type.optional();
+                }
+                ret_type = ret_type.notEmpty().withMessage("Tidak boleh kosong");
+            break;
+            case "exists_notempty":
+                ret_type = ret_type.exists().withMessage("Harus ada").notEmpty().withMessage("Tidak Boleh Kosong")
+            break;
             
-            if(req.forceValidationRequired!==undefined && req.forceValidationRequired){
-                ret_type = ret_type.exists();    
-            }else{
-                ret_type = ret_type.optional();
-            }
-            ret_type = ret_type.notEmpty().withMessage("Tidak boleh kosong");
-        break;
-        case "exists_notempty":
-            ret_type = ret_type.exists().withMessage("Harus ada").notEmpty().withMessage("Tidak Boleh Kosong")
-        break;
-        
+        }
     }
-
-    switch(type){
-        case "uuid":
-            ret_type = ret_type.isUUID().withMessage("Harus UUID");
-        break;
-        case "string":
-            ret_type = ret_type.isString().withMessage("Harus Teks");
-        break;
-        case "numeric":
-            ret_type = ret_type.isNumeric().withMessage("Harus angka");
-        break;
-        case "json":
-            ret_type = ret_type.isObject().withMessage("Harus json");
-        break;
-        case "array":
-            ret_type = ret_type.isArray().withMessage("Harus array");
-        break;
-        case "file":
-            if(req.isMulti){
+   
+    if(opt.type!==undefined){
+        switch(opt.type){
+            case "uuid":
+                ret_type = ret_type.isUUID().withMessage("Harus UUID");
+            break;
+            case "string":
+                ret_type = ret_type.isString().withMessage("Harus Teks");
+            break;
+            case "numeric":
+                ret_type = ret_type.isNumeric().withMessage("Harus angka");
+            break;
+            case "json":
+                ret_type = ret_type.isObject().withMessage("Harus json");
+            break;
+            case "array":
                 ret_type = ret_type.isArray().withMessage("Harus array");
-            }else{
-                ret_type = ret_type.isObject().withMessage("Harus JSON");
+            break;
+            case "file":
+                if(req.isMulti){
+                    ret_type = ret_type.isArray().withMessage("Harus array");
+                }else{
+                    ret_type = ret_type.isObject().withMessage("Harus JSON");
+                }
+            break;
+        }
+    }
+    if(opt.req_length!==undefined){
+        if(opt.req_length.min!==undefined || opt.req_length.max!==undefined){
+            var len = {};
+            var text_message = [];
+            ['min','max'].map(x=>{
+                len[x] = opt.req_length[x];
+                text_message.push(x+": "+len[x]);
+            })
+            if(Object.keys(len).length>0){
+                
+                ret_type = ret_type.isLength(opt.req_length).withMessage("Panjang teks "+text_message.join(","));
             }
-        break;
+        }
+    }
+    if(opt.accepted_value!==undefined){
+        if(Array.isArray(opt.accepted_value)){
+            ret_type = ret_type.custom(value=>opt.accepted_value.includes(value)).withMessage("Hanya menerima data : "+opt.accepted_value.join(","))
+        }
     }
     return ret_type;
 };
@@ -221,7 +245,14 @@ exports.verify = async (req, res, next) =>{
                 method = param(x.keyword);
             break;
         }
-        return validator_template(req,method, x.requirements,x.type).run(req);
+        var opt = {
+            method: method,
+            requirements: x.requirements,
+            type: x.type,
+            req_length: x.req_length,
+            accepted_value: x.accepted_value
+        }
+        return validator_template(req,opt,x.type).run(req);
     });
     
         var database_check = [];

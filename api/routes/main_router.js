@@ -57,7 +57,13 @@ module.exports = class MainRouter {
             }
              
         }).catch(err=>{
-            next(err);
+            if(req.catchError==true){
+                req.returnError = err;
+                next();
+            }else{
+                next(err);
+            }
+            
         })
     }
 
@@ -74,7 +80,12 @@ module.exports = class MainRouter {
                 });
             }
         }).catch(err=>{
-            next(err);
+            if(req.catchError==true){
+                req.returnError = err;
+                next();
+            }else{
+                next(err);
+            }
         })
     }
 
@@ -91,7 +102,12 @@ module.exports = class MainRouter {
                 });
             }
         }).catch(err=>{
-            next(err);
+            if(req.catchError==true){
+                req.returnError = err;
+                next();
+            }else{
+                next(err);
+            }
         })
     }
 
@@ -108,7 +124,12 @@ module.exports = class MainRouter {
                 });
             }
         }).catch(err=>{
-            next(err);
+            if(req.catchError==true){
+                req.returnError = err;
+                next();
+            }else{
+                next(err);
+            }
         })
     }
 
@@ -130,7 +151,13 @@ module.exports = class MainRouter {
                 })
             }
         }).catch(err=>{
-            next(err);
+            
+            if(req.catchError==true){
+                req.returnError = err;
+                next();
+            }else{
+                next(err);
+            }
         })
     }
 
@@ -143,7 +170,12 @@ module.exports = class MainRouter {
                 res.send({message:'Data Successfully deleted'}); 
             }
         }).catch(err=>{
-            next(err);
+            if(req.catchError==true){
+                req.returnError = err;
+                next();
+            }else{
+                next(err);
+            }
         })
     }
 }

@@ -26,9 +26,13 @@ var auto = new SequelizeAuto(config.DB, config.USER, config.PASS, {
 const { exec } = require('child_process');
 var fs = require('fs');
 auto.run().then(data=>{
+  
   var schema_list = [];
-  var extras = {};
+  var extras = {
+    "table_list":[]
+  };
   console.log(auto.options.tables)
+  
   Object.keys(data.tables).map(x=>{
     var args = []
     var input = Object.keys(data.tables[x]).map(y=>{
@@ -80,12 +84,40 @@ module.exports = {
   }
 };`;
   fs.writeFileSync('./migrations/'+x+".js", text)
+
+text =`'use strict'
+var seed_value = require('./`+table_schema[1]+`.json');
+module.exports = {
+  up: async (queryInterface, Sequelize) => {
+    return queryInterface.bulkInsert({tableName: '`+table_schema[1]+`',
+    schema: '`+table_schema[0]+`'}, seed_value.data);
+  },
+
+  down: async (queryInterface, Sequelize) => {
+    await queryInterface.bulkDelete({tableName: '`+table_schema[1]+`',schema: '`+table_schema[0]+`'}, null, {});
+  }
+};
+`;
+extras['table_list'].push({
+  "schema":table_schema[0],
+  "table":table_schema[1]
+})
+fs.writeFileSync('./seeders/'+table_schema[1]+".js", text)
+var datainput = {
+  "data":{}
+}
+Object.keys(data.tables[x]).map(x=>{
+  datainput['data'][x] = "";
+})
+
+fs.writeFileSync('./seeders/'+table_schema[1]+".json", JSON.stringify(datainput,null,"\t"))
+
   })
   extras['schema_list'] = schema_list;
+  
   fs.writeFileSync('./migration_extras.json', JSON.stringify(extras));
+
+
 }).catch(err=>{
   if (err) throw err;
 });
-
-
-

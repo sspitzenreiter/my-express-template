@@ -1,0 +1,31 @@
+{
+    "datatypes":[
+        ["CHARACTER VARYING","STRING"],
+        ["BYTEA","STRING.BINARY"],
+        ["TEXT","TEXT"],
+        ["CHAR","CHAR"],
+        ["CHARACTER","CHAR"],
+        ["CITEXT","CITEXT"],
+        ["TSVECTOR","TSVECTOR"],
+        ["BOOLEAN","BOOLEAN"],
+        ["SMALLINT","SMALLINT"],
+        ["INTEGER","INTEGER"],
+        ["NUMERIC","INTEGER"],
+        ["BIGINT","BIGINT"],
+        ["REAL","REAL"],
+        ["FLOAT","FLOAT"],
+        ["DOUBLE PRECISION","DOUBLE"],
+        ["DECIMAL","DECIMAL"],
+        ["TIMESTAMP WITH TIMEZONE","DATE"],
+        ["TIMESTAMP WITHOUT TIME ZONE","DATE"],
+        ["DATE","DATEONLY"],
+        ["TIME","TIME"],
+        ["UUID","UUID"],
+        ["JSON","JSON"],
+        ["JSONB","JSONB"]
+    ],
+    "default_value":[
+        ["now()", "sequelize.Sequelize.fn('now')"],
+        ["uuid_generate_v4()", "DataTypes.UUIDV4"]
+    ]
+}

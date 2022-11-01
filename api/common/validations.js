@@ -152,18 +152,31 @@ exports.verify = async (req, res, next) =>{
     console.log(req.mainPath,req.validator.route_data.find(x=>req.mainPath==(req.useOriginalUrl?req.originalUrl:req.route.path)));
     if(validators.roles!==undefined){
         if(req.auth_data!==undefined){
-            if(!validators.roles.includes(req.auth_data.role)){
-                res.status(401).send({
-                    message:"Akses Tidak Diperbolehkan"
-                })
-                return    
+            if(Array.isArray(req.auth_data.role)){
+                
+                if(validators.roles.filter(x=>req.auth_data.role.includes(x)).length==0){
+                    res.status(401).send({
+                        message:"Akses Tidak Diperbolehkan"
+                    })
+                    return    
+                }
+            }else{
+                if(!validators.roles.includes(req.auth_data.role)){
+                    res.status(401).send({
+                        message:"Akses Tidak Diperbolehkan"
+                    })
+                    return    
+                }
+                
             }
         }else{
             res.status(401).send({
                 message:"Akses Tidak Diperbolehkan"
             })
             return
-        }        
+        }
+        
+        
     }
     if(req.required_data!==undefined){
         if(req.method.toString().toLowerCase()=="get"){
@@ -193,10 +206,29 @@ exports.verify = async (req, res, next) =>{
     })
     
     var value_validator = validators.values;
+    
     if(!Array.isArray(value_validator) && isJson(JSON.stringify(value_validator))){
         if(req.auth_data!==undefined){
-            if(Object.keys(value_validator).includes(""+req.auth_data.role)){
-                value_validator = value_validator[""+req.auth_data.role];
+            var role_selected = "";
+            console.log(req.auth_data.role)
+            if(req.headers['x-role-reference']!==undefined){
+                if(req.auth_data.role.includes(req.headers['x-role-reference'])){
+                    role_selected = req.headers['x-role-reference']
+                }else{
+                    res.status(401).send({
+                        message:"Roles not listed or wrong roles"
+                    })
+                    return
+                }
+            }else{
+                var role_list = req.auth_data.role.filter(x=>Object.keys(value_validator).includes(x));
+                if(role_list.length>0){
+                    role_selected = role_list[0];
+                }
+            }
+            console.log("Selected Role",role_selected)
+            if(Object.keys(value_validator).includes(role_selected)){
+                value_validator = value_validator[""+role_selected];
             }else if(Object.keys(value_validator).includes("any")){
                 value_validator = value_validator["any"];
             }else{

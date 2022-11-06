@@ -100,9 +100,6 @@ module.exports = class MainRouter {
         if(req.passRoute==true){
             next();
         }else{
-<<<<<<< HEAD
-            req.routemodel.get(req.filtered['params']).then(x=>{
-=======
             var opts = {};
             if(req.data_opt_extras!==undefined){
                 if(req.data_opt_extras.table_data_attributes!==undefined){
@@ -120,7 +117,6 @@ module.exports = class MainRouter {
                 }
             }
             req.routemodel.get(req.filtered['params'],opts).then(x=>{
->>>>>>> 8e2fe42eb5135f15d949f7d533f04538d338526b
                 if(req.isNext==true){
                     req.isNext = false;
                     req.returnData = x;

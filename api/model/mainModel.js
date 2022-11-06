@@ -6,11 +6,16 @@ class mainModel {
         this.models = sequelize[model_name];
     }
 
-    get(where={}, attr=this.models.rawAttributes){
-        return this.models.findOne({
-            where:where,
-            attributes:attr
-        },{
+    get(where={}, opts={}){
+        if(opts['attributes']===undefined){
+            opts['attributes'] = this.models.rawAttributes
+        }
+        if(opts['where'] !== undefined){
+            opts['where'] = opts['where']['data'];
+        }else{
+            opts['where'] = where;
+        }
+        return this.models.findOne(opts,{
             sequelize
         })
     }

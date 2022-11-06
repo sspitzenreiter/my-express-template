@@ -106,15 +106,16 @@ if(args.findIndex(x=>x=="createroute")>-1){
                                             }else{
                                                 attr['method'] = "body";
                                             }
-                                            if(model_attr.allowNull){
-                                                if(method=="POST"){
+                                            if(!model_attr.allowNull){
+                                                attr['requirements'] = "exists_notempty";
+                                                if(method!="PATCH" && method!="GET" && method!="GET_ONE"){
                                                     attr['requirements'] = "exists_notempty";
                                                 }else{
                                                     attr['requirements'] = "optional_notempty";
                                                 }
-                                                
                                             }else{
                                                 attr['requirements'] = "optional_notempty";
+                                                
                                             }
                                         }
                                         if(method!="DELETE" || attr['method']=="params"){
@@ -124,7 +125,7 @@ if(args.findIndex(x=>x=="createroute")>-1){
 
                                     validator.route_data.push({
                                         "routes":path,
-                                        "name":path+"_"+method,
+                                        "name":route+"_"+method,
                                         "method":method.toLowerCase(),
                                         "values":values
                                     })
